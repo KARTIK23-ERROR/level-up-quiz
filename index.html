@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level Up Quiz — Gamification in Education (CSE B)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              950: '#040b18',
+              900: '#071329',
+              800: '#0d1e3f',
+              700: '#152b56',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background: radial-gradient(circle at 15% 15%, #0e2752 0%, #061024 45%, #030814 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glass-card {
+      background: rgba(13, 30, 63, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.65);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 24px rgba(14, 165, 233, 0.35);
+    }
+    .glow-gold {
+      box-shadow: 0 0 28px rgba(250, 204, 21, 0.32);
+    }
+    .option-btn {
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.65);
+      background: rgba(21, 43, 86, 0.92);
+    }
+    .option-btn:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #061024;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e3a6e;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- Ambient Decorative Orbs -->
+  <div class="fixed top-[-10%] left-[-10%] w-72 h-72 sm:w-96 sm:h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-72 h-72 sm:w-96 sm:h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-50 border-b border-sky-500/15 bg-navy-950/90 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/25">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-none">
+            Level Up <span class="text-sky-400">Quiz</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 font-medium mt-0.5">CSE B Section • Gamification in Education</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 relative z-50">
+        <span id="connection-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Sync
+        </span>
+        <button id="nav-leaderboard-btn" type="button" style="pointer-events: auto;"
+          class="cursor-pointer px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-navy-800 hover:bg-navy-700 active:scale-95 text-sky-300 border border-sky-500/40 shadow-md transition flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-amber-400 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span class="pointer-events-none">Live Podium</span>
+          <span id="nav-count-pill" class="pointer-events-none ml-0.5 px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 text-[11px] font-bold">0/59</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto px-4 py-6 sm:py-10 relative z-10">
+
+    <!-- Toast / Inline Notification Banner -->
+    <div id="toast-box" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-2xl bg-slate-900/95 border border-sky-400/40 text-sm font-medium text-white shadow-2xl flex items-center gap-2.5 max-w-[92vw]">
+      <span id="toast-icon">⚡</span>
+      <span id="toast-message">Notification</span>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 1: STUDENT LOGIN / START SCREEN                      -->
+    <!-- ========================================================= -->
+    <section id="view-login" class="max-w-lg mx-auto">
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-sky-400/25">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider mb-4">
+          <span>Round 1 Interactive Challenge</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Ready to <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-purple-400">Level Up?</span>
+        </h2>
+        <p class="text-slate-300 text-sm sm:text-base mt-2 leading-relaxed">
+          Answer 5 quick questions from our presentation. Earn <span class="text-emerald-400 font-bold">10 points</span> per right answer—fastest time breaks ties for the Top 3 Podium!
+        </p>
+
+        <!-- Quick Rules Pills -->
+        <div class="grid grid-cols-3 gap-2.5 my-6">
+          <div class="rounded-2xl bg-navy-900/90 border border-slate-700/60 p-3 text-center">
+            <div class="text-sky-400 font-extrabold text-base sm:text-lg">5 Qs</div>
+            <div class="text-[11px] text-slate-400 font-medium">Multiple Choice</div>
+          </div>
+          <div class="rounded-2xl bg-navy-900/90 border border-slate-700/60 p-3 text-center">
+            <div class="text-emerald-400 font-extrabold text-base sm:text-lg">50 Pts</div>
+            <div class="text-[11px] text-slate-400 font-medium">10 Pts Each</div>
+          </div>
+          <div class="rounded-2xl bg-navy-900/90 border border-slate-700/60 p-3 text-center">
+            <div class="text-amber-400 font-extrabold text-base sm:text-lg">Top 3</div>
+            <div class="text-[11px] text-slate-400 font-medium">Live Podium</div>
+          </div>
+        </div>
+
+        <form id="login-form" class="space-y-4" novalidate>
+          <div>
+            <label for="student-name" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              Your Full Name <span class="text-rose-400">*</span>
+            </label>
+            <input id="student-name" type="text" maxlength="40" required placeholder="e.g., Rahul Sharma"
+              class="w-full px-4 py-3.5 rounded-2xl bg-navy-950/90 border border-slate-700 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/25 text-white placeholder-slate-500 text-base outline-none transition" />
+            <p id="name-error" class="hidden text-rose-400 text-xs font-semibold mt-1.5">Please enter your name to join the quiz.</p>
+          </div>
+
+          <div>
+            <label for="student-roll" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              Roll Number / USN <span class="text-slate-500 font-normal">(Optional)</span>
+            </label>
+            <input id="student-roll" type="text" maxlength="20" placeholder="e.g., 1RV24CS042"
+              class="w-full px-4 py-3 rounded-2xl bg-navy-950/90 border border-slate-700 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/25 text-white placeholder-slate-500 text-sm outline-none transition" />
+          </div>
+
+          <button id="start-quiz-btn" type="submit"
+            class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-sky-600/30 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+            <span>Start Quiz Now</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+          <span>Class Strength: <strong class="text-slate-200">59 Students (CSE B)</strong></span>
+          <button id="open-presenter-btn" type="button" style="pointer-events: auto;"
+            class="cursor-pointer text-sky-400 hover:text-sky-300 font-semibold underline underline-offset-4 transition py-1">
+            Presenter / Live Leaderboard View →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 2: ACTIVE 5-QUESTION QUIZ SCREEN                     -->
+    <!-- ========================================================= -->
+    <section id="view-quiz" class="hidden max-w-2xl mx-auto">
+      <!-- Player Status Header -->
+      <div class="glass-card rounded-2xl p-4 mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div id="player-avatar" class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-sky-500 flex items-center justify-center font-black text-white text-base shadow-md">
+            S
+          </div>
+          <div>
+            <div id="display-player-name" class="font-bold text-white text-sm sm:text-base leading-tight">Student</div>
+            <div id="display-player-roll" class="text-xs text-slate-400">CSE B Section</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="text-right">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Time</div>
+            <div id="quiz-timer" class="font-mono font-bold text-amber-400 text-sm sm:text-base">00.0s</div>
+          </div>
+          <div class="h-7 w-px bg-slate-700/80"></div>
+          <div class="text-right">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Progress</div>
+            <div class="font-extrabold text-sky-400 text-sm sm:text-base"><span id="answered-status">0</span> / 5 Done</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-5">
+        <div class="flex justify-between text-xs font-bold text-slate-300 mb-1.5">
+          <span id="question-counter">Question 1 of 5</span>
+          <span class="text-sky-400">+10 Points</span>
+        </div>
+        <div class="w-full h-2.5 bg-navy-900 rounded-full overflow-hidden border border-slate-800">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-purple-500 rounded-full transition-all duration-300" style="width: 20%;"></div>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-sky-400/20">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-bold mb-4">
+          <span id="q-badge">Q1</span>
+          <span>•</span>
+          <span>Choose an option or skip</span>
+        </div>
+
+        <h3 id="question-text" class="text-xl sm:text-2xl font-extrabold text-white leading-snug mb-6">
+          Loading question...
+        </h3>
+
+        <!-- 4 MCQ Options -->
+        <div id="options-container" class="space-y-3">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Neutral Selection Status Note (No right/wrong reveal) -->
+        <div id="selection-status-banner" class="hidden mt-5 px-4 py-3 rounded-2xl bg-sky-500/15 border border-sky-400/35 text-xs sm:text-sm text-sky-200 flex items-center justify-between gap-2">
+          <span class="font-semibold">✓ Choice locked in. Click <strong class="text-white">Next</strong> to continue (or pick another option).</span>
+        </div>
+
+        <!-- Action Buttons: Skip & Next -->
+        <div class="mt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+          <button id="skip-question-btn" type="button"
+            class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-navy-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 font-bold text-sm transition flex items-center justify-center gap-2">
+            <span>Skip Question</span>
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button id="next-question-btn" type="button" disabled
+            class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2 shadow-lg">
+            <span id="next-btn-label">Next Question</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 3: INDIVIDUAL RESULT + LIVE LEADERBOARD / PODIUM     -->
+    <!-- ========================================================= -->
+    <section id="view-results" class="hidden space-y-6">
+
+      <!-- Personal Scorecard (Shown ONLY when a student completes the quiz) -->
+      <div id="personal-scorecard" class="hidden glass-card rounded-3xl p-6 sm:p-8 border border-emerald-400/35 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>🎉 Quiz Submitted!</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">
+              Well played, <span id="result-student-name" class="text-sky-400">Student</span>!
+            </h2>
+            <p id="result-rank-message" class="text-slate-300 text-sm sm:text-base mt-1.5">
+              Your score has been recorded on the live CSE B leaderboard.
+            </p>
+            <div class="mt-3 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-400/30 text-amber-200 text-xs sm:text-sm font-semibold">
+              <span>🔒</span>
+              <span>Official answers will be shown on the presentation screen once everyone finishes!</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 sm:gap-4 shrink-0">
+            <div class="rounded-2xl bg-navy-950/90 border border-emerald-500/30 px-4 py-3 text-center">
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Total Score</div>
+              <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-0.5"><span id="result-score">0</span><span class="text-sm text-slate-400">/50</span></div>
+            </div>
+            <div class="rounded-2xl bg-navy-950/90 border border-sky-500/30 px-4 py-3 text-center">
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Answered / Skip</div>
+              <div id="result-summary-counts" class="text-lg sm:text-xl font-black text-sky-400 mt-1">0A / 0S</div>
+            </div>
+            <div class="rounded-2xl bg-navy-950/90 border border-amber-500/30 px-4 py-3 text-center">
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Time</div>
+              <div id="result-time" class="text-xl sm:text-2xl font-black text-amber-400 mt-1">0.0s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Presenter / Leaderboard Header Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex-1">
+          <h2 class="text-2xl sm:text-3xl font-black text-white flex flex-wrap items-center gap-2.5">
+            <span>🏆 Live Class Leaderboard</span>
+            <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-sky-500/20 text-sky-300 border border-sky-400/30">
+              <span id="completed-count">0</span> / 59 Attended
+            </span>
+          </h2>
+          <div class="w-full max-w-xs h-2 bg-navy-900 rounded-full overflow-hidden border border-slate-800 mt-2">
+            <div id="attendance-progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-sky-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
+            Ranked by highest score first, then fastest completion time. Updates automatically in real time.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button id="back-to-start-btn" type="button"
+            class="cursor-pointer px-4 py-2.5 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-bold transition">
+            ← Student Login
+          </button>
+          <button id="export-csv-btn" type="button"
+            class="cursor-pointer px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold transition">
+            Export CSV
+          </button>
+          <button id="reset-scores-btn" type="button"
+            class="cursor-pointer px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs sm:text-sm font-bold transition flex items-center gap-1.5">
+            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span class="pointer-events-none">Reset All Scores</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- TOP 3 PODIUM DISPLAY                                  -->
+      <!-- ===================================================== -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-amber-400/25">
+        <div class="text-center mb-6">
+          <span class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-extrabold uppercase tracking-wider">
+            Top 3 Champions — CSE B Section
+          </span>
+        </div>
+
+        <!-- Podium Grid: 2nd | 1st | 3rd on desktop, stacked cleanly on mobile -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end max-w-4xl mx-auto">
+
+          <!-- 2nd Place (Silver) -->
+          <div class="order-2 md:order-1 rounded-2xl bg-gradient-to-b from-slate-700/40 to-navy-900/90 border border-slate-400/40 p-5 text-center relative">
+            <div class="w-11 h-11 mx-auto rounded-full bg-slate-300 text-slate-900 font-black text-lg flex items-center justify-center shadow-lg mb-3">
+              2
+            </div>
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">🥈 2nd Place</div>
+            <div id="podium-2-name" class="text-lg font-extrabold text-white truncate px-2">Waiting...</div>
+            <div id="podium-2-roll" class="text-xs text-slate-400 mb-3">—</div>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-navy-950/90 border border-slate-600/50">
+              <span id="podium-2-score" class="text-base font-black text-slate-200">0 pts</span>
+              <span class="text-slate-600">•</span>
+              <span id="podium-2-time" class="text-xs font-mono text-slate-400">0.0s</span>
+            </div>
+          </div>
+
+          <!-- 1st Place (Gold) -->
+          <div class="order-1 md:order-2 rounded-3xl bg-gradient-to-b from-amber-500/25 via-yellow-600/15 to-navy-900/95 border-2 border-amber-400/60 p-6 text-center relative glow-gold md:pb-8">
+            <div class="text-3xl mb-1">👑</div>
+            <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-yellow-300 to-amber-500 text-slate-950 font-black text-2xl flex items-center justify-center shadow-xl mb-3">
+              1
+            </div>
+            <div class="text-xs font-extrabold uppercase tracking-wider text-amber-300 mb-1">🥇 1st Place Champion</div>
+            <div id="podium-1-name" class="text-xl sm:text-2xl font-black text-white truncate px-2">Waiting...</div>
+            <div id="podium-1-roll" class="text-xs text-amber-200/70 mb-3">—</div>
+            <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-xl bg-navy-950/95 border border-amber-400/50">
+              <span id="podium-1-score" class="text-lg font-black text-amber-400">0 pts</span>
+              <span class="text-slate-600">•</span>
+              <span id="podium-1-time" class="text-xs font-mono text-amber-200">0.0s</span>
+            </div>
+          </div>
+
+          <!-- 3rd Place (Bronze) -->
+          <div class="order-3 rounded-2xl bg-gradient-to-b from-orange-700/30 to-navy-900/90 border border-orange-400/40 p-5 text-center relative">
+            <div class="w-11 h-11 mx-auto rounded-full bg-gradient-to-br from-orange-300 to-amber-700 text-slate-950 font-black text-lg flex items-center justify-center shadow-lg mb-3">
+              3
+            </div>
+            <div class="text-xs font-bold uppercase tracking-wider text-orange-300 mb-1">🥉 3rd Place</div>
+            <div id="podium-3-name" class="text-lg font-extrabold text-white truncate px-2">Waiting...</div>
+            <div id="podium-3-roll" class="text-xs text-slate-400 mb-3">—</div>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-navy-950/90 border border-orange-500/40">
+              <span id="podium-3-score" class="text-base font-black text-orange-300">0 pts</span>
+              <span class="text-slate-600">•</span>
+              <span id="podium-3-time" class="text-xs font-mono text-slate-400">0.0s</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- ALL PARTICIPANTS SCOREBOARD TABLE (UP TO 59 STUDENTS) -->
+      <!-- ===================================================== -->
+      <div class="glass-card rounded-3xl overflow-hidden border border-sky-500/20">
+        <div class="px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h3 class="font-extrabold text-white text-base sm:text-lg">
+            All Participants & Individual Scores
+          </h3>
+          <div class="relative w-full sm:w-64">
+            <input id="search-student-input" type="text" placeholder="Search classmate name..."
+              class="w-full pl-9 pr-3 py-2 rounded-xl bg-navy-950/90 border border-slate-700 focus:border-sky-400 text-xs sm:text-sm text-white placeholder-slate-500 outline-none" />
+            <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-[480px] overflow-y-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-navy-950/90 sticky top-0 z-10 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-3.5 px-4 sm:px-6 font-bold">Rank</th>
+                <th class="py-3.5 px-4 font-bold">Student Name</th>
+                <th class="py-3.5 px-4 font-bold hidden sm:table-cell">Roll / ID</th>
+                <th class="py-3.5 px-4 font-bold hidden md:table-cell text-center">Status</th>
+                <th class="py-3.5 px-4 font-bold text-right">Time</th>
+                <th class="py-3.5 px-4 sm:px-6 font-bold text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody" class="divide-y divide-slate-800/70 text-sm">
+              <tr>
+                <td colspan="6" class="py-10 text-center text-slate-400">
+                  No students have finished yet. Share the link with CSE B to begin!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Custom Reset Confirmation Modal (No browser alert/confirm) -->
+  <div id="reset-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-rose-500/40">
+      <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-black text-white">Reset All Class Scores?</h3>
+      <p class="text-slate-300 text-sm mt-2 leading-relaxed">
+        This will permanently clear all current scores from the live leaderboard so you can start fresh for the CSE B presentation.
+      </p>
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <button id="cancel-reset-btn" type="button"
+          class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-bold transition">
+          Cancel
+        </button>
+        <button id="confirm-reset-btn" type="button"
+          class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-extrabold shadow-lg shadow-rose-600/30 transition">
+          Yes, Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase & Game Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // =========================================================================
+    // 1. QUIZ DATA (Exact Questions from Slide 18 & Answers from Slide 19 + 3 Distractors)
+    // =========================================================================
+    const QUIZ_QUESTIONS = [
+      {
+        id: 1,
+        question: "Which word means using game elements in non-game places?",
+        options: [
+          "Simulation",
+          "Gamification",
+          "Virtualization",
+          "Automation"
+        ],
+        correctAnswer: "Gamification",
+        explanation: "Gamification borrows game elements like points, badges, and levels and applies them to classroom learning."
+      },
+      {
+        id: 2,
+        question: "Which popular learning app is known for daily streaks and XP?",
+        options: [
+          "Coursera",
+          "Wikipedia",
+          "Duolingo",
+          "Google Docs"
+        ],
+        correctAnswer: "Duolingo",
+        explanation: "Duolingo turns daily language practice into a game using streaks and experience points (XP)."
+      },
+      {
+        id: 3,
+        question: "Name the three starter elements known as P, B, and L.",
+        options: [
+          "Points, Badges, and Leaderboards",
+          "Play, Build, and Learn",
+          "Prizes, Bonuses, and Levels",
+          "Progress, Blocks, and Logic"
+        ],
+        correctAnswer: "Points, Badges, and Leaderboards",
+        explanation: "PBL stands for Points, Badges, and Leaderboards—the core building blocks of a gamified lesson."
+      },
+      {
+        id: 4,
+        question: "True or False — Gamification replaces teachers in the classroom.",
+        options: [
+          "True! AI runs the entire class.",
+          "True! Only in online classes.",
+          "Partially True! Teachers only grade.",
+          "False! The teacher is the Game Master."
+        ],
+        correctAnswer: "False! The teacher is the Game Master.",
+        explanation: "False! Gamification never replaces teachers—the teacher acts as the Game Master who designs, guides, tracks, and rewards."
+      },
+      {
+        id: 5,
+        question: "Name one future technology used for gamified learning.",
+        options: [
+          "Floppy Disks and Fax Machines",
+          "AI, VR/AR, or Mobile Learning Apps",
+          "Overhead Slide Projectors",
+          "Typewriters and Chalkboards"
+        ],
+        correctAnswer: "AI, VR/AR, or Mobile Learning Apps",
+        explanation: "AI Tutors, VR/AR immersive worlds, and accessible Mobile Learning Apps represent the future of gamified education."
+      }
+    ];
+
+    const CLASS_STRENGTH = 59;
+
+    // =========================================================================
+    // 2. APPLICATION STATE
+    // =========================================================================
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let appId = typeof __app_id !== "undefined" ? __app_id : "cse-b-level-up-quiz";
+    let useCloudSync = false;
+
+    let player = {
+      name: "",
+      roll: "",
+      docId: null
+    };
+
+    let quizState = {
+      currentIndex: 0,
+      score: 0,
+      answeredCount: 0,
+      skippedCount: 0,
+      selectedOption: null,
+      shuffledOptionsCache: {},
+      startTimeMs: 0,
+      elapsedMs: 0,
+      timerInterval: null
+    };
+
+    let allSubmissions = [];
+
+    // =========================================================================
+    // 3. DOM ELEMENTS
+    // =========================================================================
+    const viewLogin = document.getElementById("view-login");
+    const viewQuiz = document.getElementById("view-quiz");
+    const viewResults = document.getElementById("view-results");
+
+    const loginForm = document.getElementById("login-form");
+    const studentNameInput = document.getElementById("student-name");
+    const studentRollInput = document.getElementById("student-roll");
+    const nameError = document.getElementById("name-error");
+
+    const connectionBadge = document.getElementById("connection-badge");
+    const navLeaderboardBtn = document.getElementById("nav-leaderboard-btn");
+    const navCountPill = document.getElementById("nav-count-pill");
+    const openPresenterBtn = document.getElementById("open-presenter-btn");
+    const backToStartBtn = document.getElementById("back-to-start-btn");
+
+    const displayPlayerName = document.getElementById("display-player-name");
+    const displayPlayerRoll = document.getElementById("display-player-roll");
+    const playerAvatar = document.getElementById("player-avatar");
+    const quizTimerEl = document.getElementById("quiz-timer");
+    const answeredStatusEl = document.getElementById("answered-status");
+    const questionCounterEl = document.getElementById("question-counter");
+    const progressBarEl = document.getElementById("progress-bar");
+    const qBadgeEl = document.getElementById("q-badge");
+    const questionTextEl = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const selectionStatusBanner = document.getElementById("selection-status-banner");
+    const skipQuestionBtn = document.getElementById("skip-question-btn");
+    const nextQuestionBtn = document.getElementById("next-question-btn");
+    const nextBtnLabel = document.getElementById("next-btn-label");
+
+    const personalScorecard = document.getElementById("personal-scorecard");
+    const resultStudentName = document.getElementById("result-student-name");
+    const resultRankMessage = document.getElementById("result-rank-message");
+    const resultScore = document.getElementById("result-score");
+    const resultSummaryCounts = document.getElementById("result-summary-counts");
+    const resultTime = document.getElementById("result-time");
+
+    const exportCsvBtn = document.getElementById("export-csv-btn");
+    const attendanceProgressBar = document.getElementById("attendance-progress-bar");
+
+    const completedCountEl = document.getElementById("completed-count");
+    const leaderboardTbody = document.getElementById("leaderboard-tbody");
+    const searchStudentInput = document.getElementById("search-student-input");
+
+    const resetScoresBtn = document.getElementById("reset-scores-btn");
+    const resetModal = document.getElementById("reset-modal");
+    const cancelResetBtn = document.getElementById("cancel-reset-btn");
+    const confirmResetBtn = document.getElementById("confirm-reset-btn");
+
+    // =========================================================================
+    // 4. HELPER FUNCTIONS
+    // =========================================================================
+    function showToast(message, icon = "⚡") {
+      const box = document.getElementById("toast-box");
+      document.getElementById("toast-icon").textContent = icon;
+      document.getElementById("toast-message").textContent = message;
+      box.classList.remove("hidden");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        box.classList.add("hidden");
+      }, 3200);
+    }
+
+    function switchView(target) {
+      viewLogin.classList.add("hidden");
+      viewQuiz.classList.add("hidden");
+      viewResults.classList.add("hidden");
+      target.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function formatSeconds(ms) {
+      return (ms / 1000).toFixed(1) + "s";
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Shuffle options cleanly so A, B, C, D feel dynamic while keeping exact answers
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // =========================================================================
+    // 5. FIREBASE INITIALIZATION & REAL-TIME LISTENER
+    // =========================================================================
+    async function initFirebase() {
+      try {
+        if (typeof __firebase_config === "undefined" || !__firebase_config) {
+          throw new Error("Firebase config not available; running in local fallback mode.");
+        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        // RULE 3: Authenticate FIRST before any Firestore operations
+        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+          const cred = await signInWithCustomToken(auth, __initial_auth_token);
+          currentUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(auth);
+          currentUser = cred.user;
+        }
+
+        if (currentUser) {
+          useCloudSync = true;
+          connectionBadge.classList.remove("hidden");
+          connectionBadge.classList.add("inline-flex");
+          subscribeToLeaderboard();
+        }
+      } catch (err) {
+        console.warn("Running in single-device fallback mode:", err.message);
+        useCloudSync = false;
+        renderLeaderboard();
+      }
+    }
+
+    function getScoresCollectionRef() {
+      // RULE 1: Strict public path for shared classroom leaderboard
+      return collection(db, "artifacts", appId, "public", "data", "level_up_scores");
+    }
+
+    function subscribeToLeaderboard() {
+      if (!useCloudSync || !currentUser) return;
+
+      // RULE 2: Simple collection query without orderBy/where; sort in JS memory
+      const q = getScoresCollectionRef();
+      onSnapshot(
+        q,
+        (snapshot) => {
+          const list = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            list.push({
+              id: docSnap.id,
+              name: data.name || "Anonymous",
+              roll: data.roll || "",
+              score: Number(data.score) || 0,
+              answeredCount: data.answeredCount !== undefined ? Number(data.answeredCount) : 5,
+              skippedCount: data.skippedCount !== undefined ? Number(data.skippedCount) : 0,
+              timeMs: Number(data.timeMs) || 999999,
+              createdAt: data.createdAt || 0
+            });
+          });
+          allSubmissions = list;
+          renderLeaderboard();
+        },
+        (error) => {
+          console.error("Firestore onSnapshot error:", error);
+          showToast("Live sync hiccup—retrying automatically.", "⚠️");
+        }
+      );
+    }
+
+    // =========================================================================
+    // 6. QUIZ FLOW LOGIC (NO INSTANT ANSWER REVEAL + SKIP SUPPORT)
+    // =========================================================================
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const rawName = studentNameInput.value.trim();
+      const rawRoll = studentRollInput.value.trim();
+
+      if (!rawName) {
+        nameError.classList.remove("hidden");
+        studentNameInput.focus();
+        return;
+      }
+      nameError.classList.add("hidden");
+
+      // Prevent duplicate submission with exact same Name + Roll if already completed
+      const duplicate = allSubmissions.find(
+        (s) =>
+          s.name.toLowerCase() === rawName.toLowerCase() &&
+          (s.roll || "").toLowerCase() === rawRoll.toLowerCase()
+      );
+      if (duplicate) {
+        showToast(`${rawName} has already submitted a score (${duplicate.score}/50). Showing leaderboard!`, "ℹ️");
+        player.name = duplicate.name;
+        player.roll = duplicate.roll;
+        player.docId = duplicate.id;
+        personalScorecard.classList.add("hidden");
+        renderLeaderboard();
+        switchView(viewResults);
+        return;
+      }
+
+      player.name = rawName;
+      player.roll = rawRoll;
+      player.docId = null;
+
+      startQuiz();
+    });
+
+    function startQuiz() {
+      quizState.currentIndex = 0;
+      quizState.score = 0;
+      quizState.answeredCount = 0;
+      quizState.skippedCount = 0;
+      quizState.selectedOption = null;
+      quizState.shuffledOptionsCache = {};
+      quizState.startTimeMs = performance.now();
+      quizState.elapsedMs = 0;
+
+      displayPlayerName.textContent = player.name;
+      displayPlayerRoll.textContent = player.roll ? `ID: ${player.roll} • CSE B` : "CSE B Section";
+      playerAvatar.textContent = player.name.charAt(0).toUpperCase();
+      answeredStatusEl.textContent = "0";
+
+      clearInterval(quizState.timerInterval);
+      quizState.timerInterval = setInterval(() => {
+        quizState.elapsedMs = performance.now() - quizState.startTimeMs;
+        quizTimerEl.textContent = formatSeconds(quizState.elapsedMs);
+      }, 100);
+
+      switchView(viewQuiz);
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const qObj = QUIZ_QUESTIONS[quizState.currentIndex];
+      const total = QUIZ_QUESTIONS.length;
+      quizState.selectedOption = null;
+
+      questionCounterEl.textContent = `Question ${quizState.currentIndex + 1} of ${total}`;
+      progressBarEl.style.width = `${((quizState.currentIndex + 1) / total) * 100}%`;
+      qBadgeEl.textContent = `Q${qObj.id}`;
+      questionTextEl.textContent = qObj.question;
+
+      selectionStatusBanner.classList.add("hidden");
+      nextQuestionBtn.disabled = true;
+      nextBtnLabel.textContent =
+        quizState.currentIndex === total - 1 ? "Submit Quiz" : "Next Question";
+
+      const letters = ["A", "B", "C", "D"];
+      if (!quizState.shuffledOptionsCache[qObj.id]) {
+        quizState.shuffledOptionsCache[qObj.id] = shuffleArray(qObj.options);
+      }
+      const shuffledOptions = quizState.shuffledOptionsCache[qObj.id];
+
+      optionsContainer.innerHTML = "";
+      shuffledOptions.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.option = optText;
+        btn.dataset.letter = letters[idx];
+        btn.className =
+          "option-btn w-full text-left p-4 rounded-2xl bg-navy-900/90 border border-slate-700/80 text-white font-semibold text-sm sm:text-base flex items-center gap-3.5";
+        btn.innerHTML = `
+          <span class="option-letter w-8 h-8 shrink-0 rounded-xl bg-navy-800 border border-sky-500/30 text-sky-300 font-extrabold text-xs flex items-center justify-center">
+            ${letters[idx]}
+          </span>
+          <span class="flex-1">${escapeHtml(optText)}</span>
+          <span class="selected-pill hidden px-2.5 py-0.5 rounded-lg bg-sky-500/25 border border-sky-400/50 text-sky-300 text-[11px] font-extrabold uppercase tracking-wider">
+            Selected
+          </span>
+        `;
+        btn.addEventListener("click", () => handleAnswerSelect(btn, optText));
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswerSelect(selectedBtn, chosenText) {
+      quizState.selectedOption = chosenText;
+
+      // Neutral glowing cyan/blue selection state ONLY — no green/red reveal
+      const allBtns = optionsContainer.querySelectorAll("button");
+      allBtns.forEach((btn) => {
+        const badge = btn.querySelector(".option-letter");
+        const pill = btn.querySelector(".selected-pill");
+        const origLetter = btn.dataset.letter;
+
+        if (btn === selectedBtn) {
+          btn.classList.remove("bg-navy-900/90", "border-slate-700/80");
+          btn.classList.add("bg-sky-500/20", "border-sky-400", "glow-cyan", "text-white");
+          badge.classList.remove("bg-navy-800", "text-sky-300", "border-sky-500/30");
+          badge.classList.add("bg-sky-400", "text-slate-950", "border-sky-300");
+          badge.textContent = "✓";
+          pill.classList.remove("hidden");
+        } else {
+          btn.classList.remove("bg-sky-500/20", "border-sky-400", "glow-cyan");
+          btn.classList.add("bg-navy-900/90", "border-slate-700/80");
+          badge.classList.remove("bg-sky-400", "text-slate-950", "border-sky-300");
+          badge.classList.add("bg-navy-800", "text-sky-300", "border-sky-500/30");
+          badge.textContent = origLetter;
+          pill.classList.add("hidden");
+        }
+      });
+
+      selectionStatusBanner.classList.remove("hidden");
+      nextQuestionBtn.disabled = false;
+    }
+
+    async function advanceQuestion(isSkipped) {
+      const qObj = QUIZ_QUESTIONS[quizState.currentIndex];
+
+      if (isSkipped) {
+        quizState.skippedCount += 1;
+      } else {
+        quizState.answeredCount += 1;
+        if (quizState.selectedOption === qObj.correctAnswer) {
+          quizState.score += 10;
+        }
+      }
+
+      answeredStatusEl.textContent = String(quizState.answeredCount + quizState.skippedCount);
+
+      if (quizState.currentIndex < QUIZ_QUESTIONS.length - 1) {
+        quizState.currentIndex += 1;
+        renderQuestion();
+      } else {
+        await completeQuiz();
+      }
+    }
+
+    nextQuestionBtn.addEventListener("click", async () => {
+      if (!quizState.selectedOption) return;
+      await advanceQuestion(false);
+    });
+
+    skipQuestionBtn.addEventListener("click", async () => {
+      await advanceQuestion(true);
+    });
+
+    async function completeQuiz() {
+      clearInterval(quizState.timerInterval);
+      const finalTimeMs = Math.round(performance.now() - quizState.startTimeMs);
+      quizState.elapsedMs = finalTimeMs;
+
+      // Populate individual scorecard (no correct answers revealed here)
+      resultStudentName.textContent = player.name;
+      resultScore.textContent = String(quizState.score);
+      resultSummaryCounts.textContent = `${quizState.answeredCount}A / ${quizState.skippedCount}S`;
+      resultTime.textContent = formatSeconds(finalTimeMs);
+
+      personalScorecard.classList.remove("hidden");
+      switchView(viewResults);
+
+      const entry = {
+        name: player.name,
+        roll: player.roll,
+        score: quizState.score,
+        answeredCount: quizState.answeredCount,
+        skippedCount: quizState.skippedCount,
+        timeMs: finalTimeMs,
+        createdAt: Date.now()
+      };
+
+      if (useCloudSync && currentUser) {
+        try {
+          const docRef = await addDoc(getScoresCollectionRef(), {
+            ...entry,
+            uid: currentUser.uid,
+            timestamp: serverTimestamp()
+          });
+          player.docId = docRef.id;
+          showToast("Score submitted to live CSE B leaderboard!", "🏆");
+        } catch (err) {
+          console.error("Failed to save score to Firestore:", err);
+          allSubmissions.push({ id: "local-" + Date.now(), ...entry });
+          renderLeaderboard();
+          showToast("Saved locally (offline mode).", "📶");
+        }
+      } else {
+        const localId = "local-" + Date.now();
+        player.docId = localId;
+        allSubmissions.push({ id: localId, ...entry });
+        renderLeaderboard();
+      }
+    }
+
+    // =========================================================================
+    // 7. LEADERBOARD & TOP 3 PODIUM RENDERING
+    // =========================================================================
+    function getSortedSubmissions() {
+      return [...allSubmissions].sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score; // Highest score first
+        return a.timeMs - b.timeMs; // Fastest completion time breaks ties
+      });
+    }
+
+    function renderLeaderboard() {
+      const sorted = getSortedSubmissions();
+      const totalAttended = sorted.length;
+
+      completedCountEl.textContent = String(totalAttended);
+      navCountPill.textContent = `${totalAttended}/${CLASS_STRENGTH}`;
+      if (attendanceProgressBar) {
+        const pct = Math.min(100, Math.round((totalAttended / CLASS_STRENGTH) * 100));
+        attendanceProgressBar.style.width = `${pct}%`;
+      }
+
+      // Update personal rank message if student just finished
+      if (player.name && !personalScorecard.classList.contains("hidden")) {
+        const myIndex = sorted.findIndex(
+          (item) =>
+            (player.docId && item.id === player.docId) ||
+            (item.name.toLowerCase() === player.name.toLowerCase() && item.score === quizState.score)
+        );
+        if (myIndex !== -1) {
+          const rankNum = myIndex + 1;
+          resultRankMessage.innerHTML = `You are currently ranked <strong class="text-amber-300">#${rankNum}</strong> out of <strong class="text-white">${totalAttended}</strong> classmates in CSE B!`;
+        }
+      }
+
+      // Update Top 3 Podium Cards
+      for (let pos = 1; pos <= 3; pos++) {
+        const student = sorted[pos - 1];
+        const nameEl = document.getElementById(`podium-${pos}-name`);
+        const rollEl = document.getElementById(`podium-${pos}-roll`);
+        const scoreEl = document.getElementById(`podium-${pos}-score`);
+        const timeEl = document.getElementById(`podium-${pos}-time`);
+
+        if (student) {
+          nameEl.textContent = student.name;
+          rollEl.textContent = student.roll ? `ID: ${student.roll}` : "CSE B Student";
+          scoreEl.textContent = `${student.score} / 50`;
+          timeEl.textContent = formatSeconds(student.timeMs);
+        } else {
+          nameEl.textContent = "Waiting...";
+          rollEl.textContent = "—";
+          scoreEl.textContent = "0 pts";
+          timeEl.textContent = "0.0s";
+        }
+      }
+
+      // Filter table by search query if typed
+      const queryText = searchStudentInput.value.trim().toLowerCase();
+      const filtered = queryText
+        ? sorted
+            .map((item, idx) => ({ ...item, trueRank: idx + 1 }))
+            .filter(
+              (item) =>
+                item.name.toLowerCase().includes(queryText) ||
+                (item.roll && item.roll.toLowerCase().includes(queryText))
+            )
+        : sorted.map((item, idx) => ({ ...item, trueRank: idx + 1 }));
+
+      if (filtered.length === 0) {
+        leaderboardTbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-10 text-center text-slate-400">
+              ${
+                totalAttended === 0
+                  ? "No students have finished yet. Share the link with CSE B to begin!"
+                  : "No matching classmate found."
+              }
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      leaderboardTbody.innerHTML = filtered
+        .map((item) => {
+          const isMe =
+            (player.docId && item.id === player.docId) ||
+            (player.name && item.name.toLowerCase() === player.name.toLowerCase());
+
+          let rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs">${item.trueRank}</span>`;
+          if (item.trueRank === 1) {
+            rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-400 text-slate-950 font-black text-xs shadow">🥇</span>`;
+          } else if (item.trueRank === 2) {
+            rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-300 text-slate-950 font-black text-xs shadow">🥈</span>`;
+          } else if (item.trueRank === 3) {
+            rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-orange-400 text-slate-950 font-black text-xs shadow">🥉</span>`;
+          }
+
+          const ansCount = item.answeredCount !== undefined ? item.answeredCount : 5;
+          const skipCount = item.skippedCount !== undefined ? item.skippedCount : 0;
+
+          return `
+            <tr class="${isMe ? "bg-sky-500/15" : "hover:bg-navy-800/40"} transition">
+              <td class="py-3.5 px-4 sm:px-6">${rankBadge}</td>
+              <td class="py-3.5 px-4 font-bold text-white">
+                <div class="flex items-center gap-2">
+                  <span>${escapeHtml(item.name)}</span>
+                  ${isMe ? '<span class="px-2 py-0.5 rounded-md bg-sky-500/25 text-sky-300 text-[10px] font-extrabold uppercase">You</span>' : ""}
+                </div>
+              </td>
+              <td class="py-3.5 px-4 text-slate-400 text-xs hidden sm:table-cell">${item.roll ? escapeHtml(item.roll) : "—"}</td>
+              <td class="py-3.5 px-4 text-center hidden md:table-cell">
+                <span class="px-2 py-0.5 rounded-md bg-slate-800/90 text-slate-300 text-[11px] font-semibold">
+                  ${ansCount} Ans • ${skipCount} Skip
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-right font-mono text-xs text-slate-300">${formatSeconds(item.timeMs)}</td>
+              <td class="py-3.5 px-4 sm:px-6 text-right">
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-extrabold text-xs">
+                  ${item.score} / 50
+                </span>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    searchStudentInput.addEventListener("input", renderLeaderboard);
+
+    // =========================================================================
+    // 8. CSV EXPORT & NAVIGATION / PRESENTER CONTROLS
+    // =========================================================================
+    exportCsvBtn.addEventListener("click", () => {
+      const sorted = getSortedSubmissions();
+      if (sorted.length === 0) {
+        showToast("No scores to export yet.", "ℹ️");
+        return;
+      }
+      const headers = ["Rank", "Student Name", "Roll/USN", "Score (out of 50)", "Answered", "Skipped", "Time (seconds)"];
+      const rows = sorted.map((s, idx) => [
+        idx + 1,
+        `"${(s.name || "").replace(/"/g, '""')}"`,
+        `"${(s.roll || "").replace(/"/g, '""')}"`,
+        s.score,
+        s.answeredCount ?? 5,
+        s.skippedCount ?? 0,
+        (s.timeMs / 1000).toFixed(1)
+      ]);
+      const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "CSE_B_Level_Up_Quiz_Scores.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast("Exported CSE B scores to CSV!", "📥");
+    });
+
+    function openLivePodiumView() {
+      clearInterval(quizState.timerInterval);
+      if (!player.name) {
+        personalScorecard.classList.add("hidden");
+      }
+      renderLeaderboard();
+      switchView(viewResults);
+    }
+
+    navLeaderboardBtn.addEventListener("click", openLivePodiumView);
+
+    openPresenterBtn.addEventListener("click", () => {
+      personalScorecard.classList.add("hidden");
+      renderLeaderboard();
+      switchView(viewResults);
+    });
+
+    backToStartBtn.addEventListener("click", () => {
+      clearInterval(quizState.timerInterval);
+      switchView(viewLogin);
+    });
+
+    // Reset Scores Modal Flow
+    resetScoresBtn.addEventListener("click", () => {
+      resetModal.classList.remove("hidden");
+    });
+
+    cancelResetBtn.addEventListener("click", () => {
+      resetModal.classList.add("hidden");
+    });
+
+    confirmResetBtn.addEventListener("click", async () => {
+      confirmResetBtn.disabled = true;
+      confirmResetBtn.textContent = "Clearing...";
+
+      try {
+        if (useCloudSync && currentUser) {
+          const snap = await getDocs(getScoresCollectionRef());
+          const deletions = [];
+          snap.forEach((docSnap) => {
+            deletions.push(deleteDoc(doc(db, "artifacts", appId, "public", "data", "level_up_scores", docSnap.id)));
+          });
+          await Promise.all(deletions);
+        }
+        allSubmissions = [];
+        player.docId = null;
+        personalScorecard.classList.add("hidden");
+        renderLeaderboard();
+        showToast("All test scores cleared! Ready for CSE B.", "✨");
+      } catch (err) {
+        console.error("Error clearing scores:", err);
+        showToast("Could not clear some entries. Try again.", "⚠️");
+      } finally {
+        confirmResetBtn.disabled = false;
+        confirmResetBtn.textContent = "Yes, Clear All";
+        resetModal.classList.add("hidden");
+      }
+    });
+
+    // Start app on load
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initFirebase);
+    } else {
+      initFirebase();
+    }
+  </script>
+</body>
+</html>
